@@ -1,0 +1,148 @@
+import fileinput
+import re
+import csv
+import numpy as np
+from re import search
+#Variáveis dos Switches
+Sw0 = 'swtinmon11.txt'
+Sw1 = 'swtppmon11.txt'
+Sw2 = 'swtppmon12.txt'
+
+#Variáveis diversas
+data5 = []
+data2 = []
+data11 =[]
+data12 =[]
+data13 =[]
+data14 =[]
+res1=[]
+macdata = []
+ip_addressdata = []
+section = ''
+#in_file = False
+with open(Sw0, 'r') as f:
+         header = None
+         for line in f:
+             header_match = re.search(r'IP Arp .*', line)
+
+             if header_match:
+                 header = header_match.group(0)
+                 continue
+             mac = re.search(r"(([a-f\d]{1,2}\:){5}[a-f\d]{1,2})", line)
+             ip_address = re.search(r'^\d+\.\d+\.\d+\.\d+', line)
+             if ip_address:
+                 #print(f"{header} - {ip_address.group(0)} - {mac.group(0)}")
+                 macdata.append(mac.group(0))
+                 data5.append(header + ' - ' + ip_address.group(0) + ' - ' + mac.group(0))
+                 ip_addressdata.append(ip_address.group(0))
+
+
+
+filename = Sw1
+with fileinput.FileInput(filename, inplace=True, backup='.bak') as file1:
+    for line2 in file1:
+        print(line2.replace("-", ":"), end='')
+        exit
+filename1 = Sw2
+with fileinput.FileInput(filename1, inplace=True, backup='.bak') as file2:
+    for line3 in file2:
+        print(line3.replace("-", ":"), end='')
+        exit
+file3 = open(Sw2, 'r')
+
+lines = [line4.lower() for line4 in file3]
+with open(filename1, "r+") as f1:
+     f1.writelines(lines)
+     exit
+file4 = open(Sw1, 'r')
+
+lines = [line4.lower() for line4 in file4]
+with open(filename, "r+") as f2:
+     f2.writelines(lines)
+     exit
+
+dp2 = [d.split() for d in macdata]
+
+dp3 = [d.split('-10') for d in data5]
+print(dp3)
+dp3 = [d.replace("-10"," 10").split() for d in data5]
+dp3 = [d.split() for d in data5]
+
+for element in dp2:
+    elementstring=''.join(element)
+    #print(elementstring)
+    for element in dp3:
+        elementstring5=''.join(element)
+        #print(elementstring5)
+        if elementstring in elementstring5:
+             with open(Sw1, 'r') as f3:
+              for line5 in f3:
+               if elementstring in line5:
+                  #print(Sw1.rsplit('.txt',1)[0] + ' - ' + elementstring5.rsplit('-', 1)[0] + ' - ' + line5.rsplit('\n', 1)[0])
+                  data11.append(elementstring5.rsplit('-',1)[0] + ' ' + Sw1.rsplit('.txt',1)[0] + ' ' + line5.rsplit('\n', 1)[0])
+
+                  exit
+
+for element1 in dp2:
+    elementstring1=''.join(element1)
+    for element1 in dp3:
+        elementstring6=''.join(element1)
+        if elementstring1 in elementstring6:
+            with open('swtppmon12.txt', 'r') as f4:
+             for line6 in f4:
+              if elementstring1 in line6:
+                  # print(Sw2.rsplit('.txt',1)[0]  + ' - ' + elementstring6.rsplit('-', 1)[0] + ' - ' + line6.rsplit('\n', 1)[0])
+
+                   data12.append(str(elementstring6.rsplit('-',1)[0] + ' ' +Sw2.rsplit('.txt',1)[0] + ' ' + line6.rsplit('\n', 1)[0]))
+                   exit
+
+
+filename = Sw1
+with fileinput.FileInput(filename, inplace=True) as file:
+    for line in file:
+        print(line.replace(":", "-"), end='')
+
+filename1 = Sw2
+with fileinput.FileInput(filename1, inplace=True) as file:
+    for line in file:
+        print(line.replace(":", "-"), end='')
+
+
+dp = [d.split() for d in data11]
+dp = [d.replace("-1"," 1").split() for d in data11]
+dp = [d.replace(": ",":").split() for d in data11]
+dp1 =[d.split()for d in data12]
+dp1 = [d.replace("-1"," 1").split() for d in data12]
+dp1 = [d.replace(": ",":").split() for d in data12]
+
+for idx, d in enumerate(dp):
+    if d:
+        orig = d[0].replace("-1"," 1").split()  # create a 2 part list
+        d = orig + d[1:]                        # use list slicing
+    dp[idx] = d
+
+for idx, d in enumerate(dp1):
+    if d:
+        orig = d[0].replace("-1", " 1").split()  # create a 2 part list
+        d = orig + d[1:]  # use list slicing
+    dp1[idx] = d
+
+
+
+with open("Tabela de Mapeamento.csv","w", newline="") as f:    # w not wb and supply newline
+    writer = csv.writer(f)
+    writer.writerow(['VRF','IP-Address', 'Switch', 'MAC', 'Vid', 'Type', 'Source'])
+    writer.writerows(dp)
+    writer.writerows(dp1)
+
+with open("Tabela de Mapeamento.csv") as f:
+    print(f.read())
+
+
+
+
+
+
+
+
+
